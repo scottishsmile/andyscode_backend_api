@@ -43,6 +43,7 @@ try
 {
     Log.Information("API Booting...");
     Debug.WriteLine("API Booting...");
+    Console.WriteLine("API Booting...");        // Leave this in incase serilog doesn't load on bootup.
 
     var builder = WebApplication.CreateBuilder(args);
 
@@ -312,6 +313,7 @@ try
     if (app.Environment.EnvironmentName == "Local")
     {
         Debug.WriteLine("Environment is LOCAL");
+        Console.WriteLine("Environment is LOCAL");        // Leave this in incase serilog doesn't load on bootup.
 
         app.UseMigrationsEndPoint();
         app.UseSwagger();                           // Swagger only in dev mode.
@@ -335,6 +337,7 @@ try
     if (app.Environment.EnvironmentName == "Development")
     {
         Debug.WriteLine("Environment is DEVELOPMENT");
+        Console.WriteLine("Environment is DEVELOPMENT");        // Leave this in incase serilog doesn't load on bootup.
 
         app.UseMigrationsEndPoint();
         app.UseSwagger();                           // Swagger only in dev mode.
@@ -358,6 +361,7 @@ try
     if (app.Environment.EnvironmentName == "Production")
     {
         Debug.WriteLine("Environment is PRODUCTION");
+        Console.WriteLine("Environment is PRODUCTION");        // Leave this in incase serilog doesn't load on bootup.
 
         // No Swagger in production!
         // Use index page instead.
@@ -398,6 +402,7 @@ catch (Exception ex)
     else
     {
         Log.Fatal("Error! API Failed To Start! - " + ex.Message);
+        Console.WriteLine("Error! API Failed To Start! - " + ex.Message);        // Leave this in incase serilog doesn't load on bootup.
     }
 
 }
