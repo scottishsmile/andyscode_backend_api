@@ -1,21 +1,82 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
+/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
 
 body {
-  margin-bottom: 60px;
-  background-color: black;
-  color: white;
-  text-align: center;
+    background: black;
+    font-family: 'Ariel', sans-serif;
+    color: #646464;
+    justify-content: normal;
+    align-items: center;
+    min-height: 80vh;
+    margin: 0;
+    padding: 0;
+}
+
+.main-h1 {
+    color: royalblue;
+    font-size: 60px;
+    margin-bottom: 2px;
+    align-items: center;
+    text-align: center;
+}
+
+.main-h2 {
+    color: royalblue;
+    font-size: 50px;
+    margin-bottom: 2px;
+    align-items: center;
+    text-align: center;
+}
+
+.main-p {
+    font-size: 20px;
+    color: white;
+    align-items: center;
+    text-align: center;
+    padding-top: 5px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+
+.note {
+    color: gold;
+    text-align: center;
+    font-style: italic;
+    padding-bottom: 1px;
+    font-size: small;
+}
+
+
+
+/* Page Controller CSS Classes */
+
+.page-container {
+    color: white;
+    background-color: black;
+}
+
+    .page-container a {
+        color: gold;
+    }
+
+        .page-container a:hover {
+            color: lightblue;
+        }
+
+
+/* Phones and iPads */
+@media (max-width: 1200px) {
+
+    input {
+        width: 90%;
+    }
+
+    .main-h1 {
+        font-size: 20px;
+    }
+
+    .main-p {
+        font-size: 12px;
+    }
+
 }

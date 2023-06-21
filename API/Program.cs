@@ -191,7 +191,9 @@ try
     builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
         opt.TokenLifespan = TimeSpan.FromHours(2));
 
+    // Index page for production use.
     builder.Services.AddControllersWithViews();
+
 
     // Versioning
     builder.Services.AddApiVersioning(opt =>
@@ -358,6 +360,11 @@ try
         Debug.WriteLine("Environment is PRODUCTION");
 
         // No Swagger in production!
+        // Use index page instead.
+        // URL Routes
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Index}/{action=IndexPage}");
     }
 
     app.UseHttpsRedirection();
