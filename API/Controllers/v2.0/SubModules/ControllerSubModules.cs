@@ -294,11 +294,17 @@ namespace API.Controllers.v2_0.SubModules
 
                     if (compareDates <= 0)
                     {
+                        // TESTING
+                        _logger.LogInformation("RefreshTokenIsCurrent - True - Token: {0}", token);
+
                         // Success. Token is current! Token has not expired!
                         return true;
                     }
                     else
                     {
+                        // TESTING
+                        _logger.LogInformation("RefreshTokenIsCurrent - False. Removing Token. - Token: {0}", token);
+
                         // Fail. Token is NOT current! Token has expired!
 
                         // delete expired refresh token
@@ -308,6 +314,9 @@ namespace API.Controllers.v2_0.SubModules
                         return false;
                     }
                 }
+
+                // TESTING
+                _logger.LogInformation("RefreshTokenIsCurrent - False. Could not find token. - Token: {0}", token);
 
                 return false;
             }
