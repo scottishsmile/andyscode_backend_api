@@ -376,6 +376,9 @@ namespace API.Controllers.v2_0.SubModules
 
                 if (expiredTokensList != null && expiredTokensList.Count() > 0)
                 {
+                    // TESTING
+                    _logger.LogError("ControllerSubModule.RefreshTokenPruning - removing tokens for user: {0} tokens: {1}", user.UserName, expiredTokensList);
+
                     // Delete the exired tokens
                     _context.RefreshTokenTable.RemoveRange(expiredTokensList);
                     _context.SaveChanges();

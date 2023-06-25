@@ -649,11 +649,12 @@ namespace API.Controllers.v2_0
                                 var newRefreshToken = await _subModule.GenerateRefreshToken(user);
 
 
+                                /*
                                 // Refresh Token Pruning
                                 // Check for expired refresh tokens and delete them.
                                 // Could maybe be better handled in a recurring servcie run by Hangfire? Rather than in the login endpoint? Easier on the database.
                                 var refreshTokenPruning = await _subModule.RefreshTokenPruning(user);
-
+                                */
 
                                 LoginResponseDto loginReply = new LoginResponseDto();
                                 loginReply.AccessToken = accessToken.token;
@@ -823,11 +824,12 @@ namespace API.Controllers.v2_0
                                             // Also allows users to stay logged into the app longer.
                                             var newRefreshToken = await _subModule.GenerateRefreshToken(user);
 
-
+                                            /*
                                             // Refresh Token Pruning
                                             // Check for expired refresh tokens and delete them.
                                             // Could maybe be better handled in a recurring servcie run by Hangfire? Rather than in the login endpoint? Easier on the database.
                                             var refreshTokenPruning = await _subModule.RefreshTokenPruning(user);
+                                            */
 
                                             // Mfa Token Pruning
                                             // Check for expired MFA tokens and delete them.
