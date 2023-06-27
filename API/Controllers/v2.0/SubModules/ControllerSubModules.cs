@@ -212,6 +212,9 @@ namespace API.Controllers.v2_0.SubModules
 
                     if (oldToken != null)
                     {
+                        // TESTING
+                        _logger.LogError($"ControllerSubModule.GenerateRefreshToken - Old Token {oldToken} deleted from database -  USER: {user.Id} - Token: {refreshToken}");
+
                         // delete old refresh token
                         _context.RefreshTokenTable.Remove(oldToken);
                     }
@@ -382,7 +385,12 @@ namespace API.Controllers.v2_0.SubModules
                     // Delete the exired tokens
                     _context.RefreshTokenTable.RemoveRange(expiredTokensList);
                     _context.SaveChanges();
+
+                    return true;
                 }
+
+                // TESTING
+                _logger.LogError("ControllerSubModule.RefreshTokenPruning - No tokens to purge");
 
                 return true;
             }
