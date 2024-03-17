@@ -131,7 +131,7 @@ namespace API.Controllers.v2_0.SubModules
         public (string token, DateTime DateTokenExpires) GenerateAccessToken(AppUser user, IList<string> userRoles)
         {
 
-            var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.AccessTokenSecretKey);
+            var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.AccessTokenSecretKey);                            // Your appsettings.json secret key must be long or you will get an error.
 
             // Generate the Name and Email Claims
             var authClaims = new List<Claim>
@@ -160,7 +160,7 @@ namespace API.Controllers.v2_0.SubModules
                 audience: _jwtBearerTokenSettings.Audience,
                 expires: dateTokenExpires,                                                                                       // Access token lasts X MINUTES.
                 claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha512)
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha512)                       // Your appsettings.json secret key must be long or you will get an error.
                 );
 
 
@@ -174,7 +174,7 @@ namespace API.Controllers.v2_0.SubModules
         // Refresh Token
         public async Task<RefreshTokenTable> GenerateRefreshToken(AppUser user, string? refreshToken = null)
         {
-            var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.RefreshTokenSecretKey);
+            var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.RefreshTokenSecretKey);                                   // Your appsettings.json secret key must be long or you will get an error.
 
             // Refresh Token does not need claims.
 
@@ -186,7 +186,7 @@ namespace API.Controllers.v2_0.SubModules
                 issuer: _jwtBearerTokenSettings.Issuer,
                 audience: _jwtBearerTokenSettings.Audience,
                 expires: dateTokenExpires,                                                                                       // Refresh Token lasts X MINUTES
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha512)
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha512)                        // Your appsettings.json secret key must be long or you will get an error.
                 );
 
             // Generate new refresh token
@@ -213,7 +213,7 @@ namespace API.Controllers.v2_0.SubModules
                     if (oldToken != null)
                     {
                         // TESTING
-                        _logger.LogError($"ControllerSubModule.GenerateRefreshToken - Old Token {oldToken} deleted from database -  USER: {user.Id} - Token: {refreshToken}");
+                        _logger.LogInformation($"ControllerSubModule.GenerateRefreshToken - Old Token {oldToken} deleted from database -  USER: {user.Id} - Token: {refreshToken}");
 
                         // delete old refresh token
                         _context.RefreshTokenTable.Remove(oldToken);
@@ -248,8 +248,6 @@ namespace API.Controllers.v2_0.SubModules
                 var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.RefreshTokenSecretKey);
 
                 // Refresh Token does not need claims.
-
-                var authSigningKey = new SymmetricSecurityKey(key);
 
                 // The same validation parameters that are in Program.cs
                 var validationParameters = new TokenValidationParameters()

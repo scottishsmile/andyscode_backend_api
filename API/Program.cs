@@ -24,15 +24,15 @@ using API.Services.v2_0.EmailService;
 using API.Validation.v2_0;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
-using System.Reflection;
 using API.Services;
 using Microsoft.AspNetCore.HttpOverrides;           // NGINX or Apache reverse proxy header.
 using System.Net;
 using API.Services.v2_0.MyMFA;
+using MySqlConnector;
 
 
 
@@ -199,7 +199,7 @@ try
     // Versioning
     builder.Services.AddApiVersioning(opt =>
     {
-        opt.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(2, 0);                              // Default Version is v2.0
+        opt.DefaultApiVersion = new ApiVersion(2, 0);                               // Default Version is v2.0
         opt.AssumeDefaultVersionWhenUnspecified = true;                                                     // Useful for migrating an API without versioning to supporting versioning. No Version number supplied? Assume v1.0.
         opt.ReportApiVersions = true;                                                                       // The API broadcasts what versions are available. "api-supported-versions: 1.0, 2.0".
 
@@ -210,12 +210,12 @@ try
                                                         new HeaderApiVersionReader("api-version"),          // Get version number from a seperate request header. "api-version: 1.0"
                                                         new MediaTypeApiVersionReader("api-version"),       // Get version number from the Accept or Content-Type request headers. "Accept: application/json; api-version=1.0"
                                                         new QueryStringApiVersionReader("api-version"));    // Change the query string paramter name if you want to "?api-version=1.0"  GET www.mysite.com/api/controller?api-version=1.0
-    });
-
-    // Configure Swagger to show the API versions
-    // Add ApiExplorer to discover versions
-    builder.Services.AddVersionedApiExplorer(setup =>
+    })
+    .AddMvc()
+    .AddApiExplorer(setup =>
     {
+        // Configure Swagger to show the API versions
+        // Add ApiExplorer to discover versions
         setup.GroupNameFormat = "'v'VVV";
         setup.SubstituteApiVersionInUrl = true;
     });
@@ -332,6 +332,28 @@ try
 
             options.RoutePrefix = string.Empty;
         });
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            if (dbContext != null)
+            {
+                // Do not run migrations for in-memory database used with integration tests.
+                // Only run migrations on relational databases
+                if (dbContext.Database.IsRelational())
+                {
+                    // Create database using migrations if it doesn't already exist.
+                    dbContext.Database.Migrate();
+                }
+            }
+            else
+            {
+                Debug.WriteLine("Program.cs - Error: Can't Retrieve Database Context");
+                Console.WriteLine("Program.cs - Error: Can't Retrieve Database Context");
+                throw new DbUpdateException("Program.cs - Error: Can't Retrieve Database Context");
+            }
+        }
     }
 
     if (app.Environment.EnvironmentName == "Development")
@@ -356,6 +378,28 @@ try
 
             options.RoutePrefix = string.Empty;
         });
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            if (dbContext != null)
+            {
+                // Do not run migrations for in-memory database used with integration tests.
+                // Only run migrations on relational databases
+                if (dbContext.Database.IsRelational())
+                {
+                    // Create database using migrations if it doesn't already exist.
+                    dbContext.Database.Migrate();
+                }
+            }
+            else
+            {
+                Debug.WriteLine("Program.cs - Error: Can't Retrieve Database Context");
+                Console.WriteLine("Program.cs - Error: Can't Retrieve Database Context");
+                throw new DbUpdateException("Program.cs - Error: Can't Retrieve Database Context");
+            }
+        }
     }
 
     if (app.Environment.EnvironmentName == "Production")
@@ -369,6 +413,8 @@ try
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Index}/{action=IndexPage}");
+
+        // Database is handled differently in production, no need to auto create.
     }
 
     app.UseHttpsRedirection();
@@ -388,6 +434,20 @@ try
     // Run the App
     Log.Information("API Starting Up...");
     app.Run();
+}
+catch (MySqlException ex)
+{
+    // PostgreSQL Database Connection Error
+
+    Log.Fatal("Error! API Failed To Start! - " + ex.Message);
+
+    Console.WriteLine("MySQL Error! - Please check your connection string in appsettings! It should look like: ");
+    Console.WriteLine("\"MySQLConnection\": \"Server=localhost; Port=3306; Database=identity_db; Uid=YourUser; Pwd=YourPass123;\"");
+    Console.WriteLine();
+    Console.WriteLine("Also check that the MySQL service Mysql80 is running in Window's Services.msc");
+    Console.WriteLine();
+    Console.WriteLine("MySQL Error Message - " + ex.Message);
+    Console.WriteLine();
 }
 catch (Exception ex)
 {

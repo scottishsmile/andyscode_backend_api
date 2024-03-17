@@ -16,6 +16,7 @@ using Serilog.Context;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Net;
+using Asp.Versioning;
 
 namespace API.Controllers.v1_0
 {

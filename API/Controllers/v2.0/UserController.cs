@@ -18,7 +18,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Net;
 using API.Services.v2_0.MyMFA;
-using API.Migrations;
+using Asp.Versioning;
 
 namespace API.Controllers.v2_0
 {
