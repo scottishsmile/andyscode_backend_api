@@ -1023,6 +1023,7 @@ namespace API.Controllers.v2_0
                                             refreshReply.RefreshTokenExpiry = newRefreshToken.DateTokenExpires;
                                             refreshReply.AccessToken = newAccessToken.token;
                                             refreshReply.AccessTokenExpiry = newAccessToken.DateTokenExpires;
+                                            refreshReply.UserName = request.UserName;
 
                                             response.Data = refreshReply;
                                             response.Success = true;
