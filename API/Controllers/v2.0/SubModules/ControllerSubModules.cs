@@ -172,71 +172,78 @@ namespace API.Controllers.v2_0.SubModules
 
 
         // Refresh Token
-        public async Task<RefreshTokenTable> GenerateRefreshToken(AppUser user, string? refreshToken = null)
-        {
-            var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.RefreshTokenSecretKey);                                   // Your appsettings.json secret key must be long or you will get an error.
+		public async Task<RefreshTokenTable> GenerateRefreshToken(AppUser user, string? refreshToken = null)
+		{
+			var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.RefreshTokenSecretKey);                                   // Your appsettings.json secret key must be long or you will get an error.
 
-            // Refresh Token does not need claims.
+			// Refresh Token Claims
+			// The access token will be automatically deleted by the browser once it exceeds its maxAge.
+			// So the refresh token has to include the username, so it can request a new token for the user.
+			var authClaims = new List<Claim>
+			{
+				new Claim(ClaimTypes.Name, user.UserName.ToString()),    
+			};
 
-            var authSigningKey = new SymmetricSecurityKey(key);
+			var authSigningKey = new SymmetricSecurityKey(key);
 
-            var dateTokenExpires = DateTime.UtcNow.AddMinutes(_jwtBearerTokenSettings.RefreshTokenExpiryTimeInMinutes);
+			var dateTokenExpires = DateTime.UtcNow.AddMinutes(_jwtBearerTokenSettings.RefreshTokenExpiryTimeInMinutes);
 
-            var tokenDetails = new JwtSecurityToken(
-                issuer: _jwtBearerTokenSettings.Issuer,
-                audience: _jwtBearerTokenSettings.Audience,
-                expires: dateTokenExpires,                                                                                       // Refresh Token lasts X MINUTES
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha512)                        // Your appsettings.json secret key must be long or you will get an error.
-                );
+			var tokenDetails = new JwtSecurityToken(
+				issuer: _jwtBearerTokenSettings.Issuer,
+				audience: _jwtBearerTokenSettings.Audience,
+				expires: dateTokenExpires,                                                                                       // Refresh Token lasts X MINUTES
+				claims: authClaims,
+				signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha512)                        // Your appsettings.json secret key must be long or you will get an error.
+				);
 
-            // Generate new refresh token
-            var token = new JwtSecurityTokenHandler().WriteToken(tokenDetails);
+			// Generate new refresh token
+			var token = new JwtSecurityTokenHandler().WriteToken(tokenDetails);
 
-            // Create new refresh token object. Used in our database table. We need to track which refresh tokens are assigned to which users.
-            var newRefreshToken = new RefreshTokenTable
-            {
-                UserId = user.Id,
-                RefreshToken = token,
-                DateTokenIssued = DateTime.UtcNow,
-                DateTokenExpires = dateTokenExpires
-            };
+			// Create new refresh token object. Used in our database table. We need to track which refresh tokens are assigned to which users.
+			var newRefreshToken = new RefreshTokenTable
+			{
+				UserId = user.Id,
+				RefreshToken = token,
+				DateTokenIssued = DateTime.UtcNow,
+				DateTokenExpires = dateTokenExpires
+			};
 
-            // Remove the current Refresh token from the database if it was passed to us.
-            try
-            {
-                if (refreshToken != null)
-                {
+			// Remove the current Refresh token from the database if it was passed to us.
+			try
+			{
+				if (refreshToken != null)
+				{
 
-                    // Find the the old refresh token
-                    var oldToken = await _context.RefreshTokenTable.Where(t => t.RefreshToken == refreshToken).FirstOrDefaultAsync();
+					// Find the the old refresh token
+					var oldToken = await _context.RefreshTokenTable.Where(t => t.RefreshToken == refreshToken).FirstOrDefaultAsync();
 
-                    if (oldToken != null)
-                    {
-                        // TESTING
-                        _logger.LogInformation($"ControllerSubModule.GenerateRefreshToken - Old Token {oldToken} deleted from database -  USER: {user.Id} - Token: {refreshToken}");
+					if (oldToken != null)
+					{
+						// TESTING
+						_logger.LogInformation($"ControllerSubModule.GenerateRefreshToken - Old Token {oldToken} deleted from database -  USER: {user.Id} - Token: {refreshToken}");
 
-                        // delete old refresh token
-                        _context.RefreshTokenTable.Remove(oldToken);
-                    }
-                    else
-                    {
-                        _logger.LogError("Couldn't find old refresh token! ControllerSubModule.GenerateRefreshToken - USER: {0} - Token: {1}", user.Id, refreshToken);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Exception! Couldn't find old refresh token! ControllerSubModule.GenerateRefreshToken - USER: {0} - Token: {1}", user.Id, refreshToken);
-            }
+						// delete old refresh token
+						_context.RefreshTokenTable.Remove(oldToken);
+					}
+					else
+					{
+						_logger.LogError("Couldn't find old refresh token! ControllerSubModule.GenerateRefreshToken - USER: {0} - Token: {1}", user.Id, refreshToken);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError("Exception! Couldn't find old refresh token! ControllerSubModule.GenerateRefreshToken - USER: {0} - Token: {1}", user.Id, refreshToken);
+			}
 
-            // Add the new refresh token to the database so we can confirm it in the future.
-            var addToken = await _context.RefreshTokenTable.AddAsync(newRefreshToken);
+			// Add the new refresh token to the database so we can confirm it in the future.
+			var addToken = await _context.RefreshTokenTable.AddAsync(newRefreshToken);
 
-            // Save changes to database
-            await _context.SaveChangesAsync();
+			// Save changes to database
+			await _context.SaveChangesAsync();
 
-            return newRefreshToken;
-        }
+			return newRefreshToken;
+		}
 
 
 
