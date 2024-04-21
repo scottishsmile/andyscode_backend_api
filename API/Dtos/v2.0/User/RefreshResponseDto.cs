@@ -9,5 +9,6 @@
         public DateTime RefreshTokenExpiry { get; set; }
         public string AccessToken { get; set; }
         public DateTime AccessTokenExpiry { get; set; }
+        public string UserName { get; set; }
     }
 }
